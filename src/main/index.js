@@ -1,10 +1,55 @@
 import { app, shell, BrowserWindow, ipcMain, dialog } from "electron";
-import { join } from "path";
+import { join, resolve } from "path";
 import * as fs from "fs";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import icon from "../../resources/icon.png?asset";
 
 let mainWindow;
+
+// set custom protocol
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient("electron-fiddle", process.execPath, [
+      resolve(process.argv[1]),
+    ]);
+  } else {
+    app.setAsDefaultProtocolClient("electron-fiddle");
+  }
+}
+
+// open from browser for windows
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on("second-instance", (event, commandLine) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+    }
+    // the commandLine is array of strings in which last element is deep link url
+    // the url str ends with /
+    const url = new URL(commandLine.pop().slice(0, -1));
+    const params = new URLSearchParams(url.hash.slice(1)); // Remove the leading '#'
+    const access_token = params.get("access_token");
+
+    if (!access_token) {
+      dialog.showErrorBox("Welcome Back", `You arrived from: ${url}`);
+      mainWindow.webContents.send("send-access-token", {});
+    } else {
+      mainWindow.webContents.send("send-access-token", {
+        access_token,
+      });
+    }
+  });
+}
+
+// open from browser from mac/linux
+app.on("open-url", (event, url) => {
+  dialog.showErrorBox("Welcome Back", `You arrived from: ${url}`);
+});
 
 async function extractMP3Metadata(directory, name) {
   try {

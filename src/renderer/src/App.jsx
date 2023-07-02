@@ -3,39 +3,18 @@ import { useEffect, useState } from "react";
 import Auth from "./components/Auth";
 import Home from "./components/Home";
 
-const clientId = "79266cecabf348d581917b70a6a28c12";
-const redirectUri = "http://localhost:5173/callback";
-
 export default function App() {
   const [accessToken, setAccessToken] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  console.log(location.href);
 
   useEffect(() => {
-    async function onInit() {
-      const url = new URL(window.location.href);
-      const params = new URLSearchParams(url.hash.slice(1)); // Remove the leading '#'
-
-      const token = params.get("access_token");
-
-      if (token) {
-        setAccessToken(token);
-      }
-    }
-    onInit();
+    window.electron.ipcRenderer.on("send-access-token", (_, args) => {
+      if (args.access_token) setAccessToken(args.access_token);
+      setLoading(false);
+    });
   }, []);
-
-  const handleLogin = () => {
-    const scopes = [
-      "playlist-read-private",
-      "playlist-modify-public",
-      "playlist-modify-public",
-    ];
-
-    const scopeString = scopes.join(" ");
-
-    window.location = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
-      redirectUri
-    )}&scope=${encodeURIComponent(scopeString)}&response_type=token`;
-  };
 
   return (
     <>
@@ -43,7 +22,7 @@ export default function App() {
       {accessToken ? (
         <Home token={accessToken} />
       ) : (
-        <Auth handleLogin={handleLogin} />
+        <Auth loading={loading} setLoading={setLoading} />
       )}
     </>
   );
