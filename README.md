@@ -1,6 +1,6 @@
-# app-js
+# Playlist Generator
 
-An Electron application with React
+Creates a spotify playlist of all your songs present on your device
 
 ## Recommended IDE Setup
 
@@ -32,4 +32,6 @@ $ npm run build:mac
 # For Linux
 $ npm run build:linux
 ```
+
 # playlist-gen
+
