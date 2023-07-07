@@ -6,6 +6,7 @@ This is the link to the working demo:
 [Demo Link](https://www.loom.com/share/2b50c2dc42014b418ed027eda6364351)
 
 Executable file download link (Google Drive) [playlist-gen.exe](https://drive.google.com/file/d/1Wxz9QftLiOktR-madL6wX1rdnVwvWUfn/view?usp=sharing)
+### App won't work for now, up for review for API use by spotify team
 
 ## Recommended IDE Setup
 
